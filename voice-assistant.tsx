@@ -127,17 +127,32 @@ export default function VoiceAssistant() {
           clearInterval(recordingIntervalRef.current)
         }
 
-        // Solo procesar si no estamos en modo "listening" (el usuario hizo click para parar)
-        if (!isPressed) {
-          const textToProcess = transcribedTextRef.current.trim()
-          console.log("Procesando texto:", textToProcess)
-
-          if (textToProcess) {
-            processTranscribedText(textToProcess)
-          } else {
-            console.log("No hay texto para procesar")
-            setState("idle")
+        // Si el usuario NO ha hecho clic para detener, reinicia el reconocimiento (móvil/PC)
+        if (isPressed) {
+          try {
+            recognitionRef.current && recognitionRef.current.start()
+            setState("listening")
+            recordingIntervalRef.current = setInterval(() => {
+              setRecordingTime((prev) => prev + 1)
+            }, 1000)
+            console.log("Reconocimiento reiniciado automáticamente")
+          } catch (error) {
+            console.error("Error al reiniciar reconocimiento:", error)
+            setState("error")
+            setErrorMessage("No se pudo reiniciar el reconocimiento de voz")
           }
+          return
+        }
+
+        // Solo procesar si no estamos en modo "listening" (el usuario hizo click para parar)
+        const textToProcess = transcribedTextRef.current.trim()
+        console.log("Procesando texto:", textToProcess)
+
+        if (textToProcess) {
+          processTranscribedText(textToProcess)
+        } else {
+          console.log("No hay texto para procesar")
+          setState("idle")
         }
       }
 
