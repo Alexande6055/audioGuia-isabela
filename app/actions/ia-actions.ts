@@ -100,6 +100,8 @@ No incluyas información irrelevante.
 
 Pregunta al turista si quiere saber mas. 
 
+porcierto el centro de crianza de tortugas en isabela es de tortugas gigantes terrestres, no de tortugas marinas.
+
 Usuario: "${promptData}"
 
 `
