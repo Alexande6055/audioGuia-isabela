@@ -201,13 +201,18 @@ export default function VoiceAssistant() {
       const result = await processVoiceQuery(text)
       console.log("Respuesta:", result)
 
-      const response = result.content
-      setIsFallbackMode(result.fallback || false)
+      const response = result
+      setIsFallbackMode(result || false)
+
+      // Cancelar cualquier síntesis previa antes de hablar
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+      }
 
       // Usar Text-to-Speech del navegador para generar audio de respuesta
-      const utterance = new SpeechSynthesisUtterance(response)
+      const utterance = new window.SpeechSynthesisUtterance(response)
       utterance.lang = "es-ES"
-      utterance.rate = 0.9
+      utterance.rate = 1.1
       utterance.pitch = 1
 
       utterance.onstart = () => setState("playing")
@@ -232,7 +237,7 @@ export default function VoiceAssistant() {
         }, 3000)
       }
 
-      speechSynthesis.speak(utterance)
+      window.speechSynthesis.speak(utterance)
     } catch (error) {
       console.error("Error al procesar:", error)
       setState("error")
