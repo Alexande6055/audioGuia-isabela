@@ -119,7 +119,6 @@ export default function VoiceAssistant() {
         transcribedTextRef.current = currentText // Guardar el texto transcrito actual
         console.log("Texto reconocido:", currentText)
       }
-
       recognitionRef.current.onend = () => {
         console.log("Reconocimiento terminado")
 
@@ -127,24 +126,7 @@ export default function VoiceAssistant() {
           clearInterval(recordingIntervalRef.current)
         }
 
-        // Si el usuario NO ha hecho clic para detener, reinicia el reconocimiento (móvil/PC)
-        if (isPressed) {
-          try {
-            recognitionRef.current && recognitionRef.current.start()
-            setState("listening")
-            recordingIntervalRef.current = setInterval(() => {
-              setRecordingTime((prev) => prev + 1)
-            }, 1000)
-            console.log("Reconocimiento reiniciado automáticamente")
-          } catch (error) {
-            console.error("Error al reiniciar reconocimiento:", error)
-            setState("error")
-            setErrorMessage("No se pudo reiniciar el reconocimiento de voz")
-          }
-          return
-        }
-
-        // Solo procesar si no estamos en modo "listening" (el usuario hizo click para parar)
+        // Ya NO reinicia el reconocimiento, solo procesa el texto y vuelve a idle
         const textToProcess = transcribedTextRef.current.trim()
         console.log("Procesando texto:", textToProcess)
 
@@ -319,14 +301,11 @@ export default function VoiceAssistant() {
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
-
     if (state === "idle") {
-      // Empezar a grabar
       setIsPressed(true)
       startListening()
     } else if (state === "listening") {
-      // Parar y procesar
-      setIsPressed(false)
+      setIsPressed(false) // <-- Esto debe ir ANTES de stopListening
       stopListening()
     }
   }
