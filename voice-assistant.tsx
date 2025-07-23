@@ -199,7 +199,6 @@ export default function VoiceAssistant() {
     try {
       // Llamar al Server Action (siempre funciona ahora con fallback)
       const result = await processVoiceQuery(text)
-      console.log("Respuesta:", result)
 
       const response = result
       setIsFallbackMode(result || false)
@@ -209,10 +208,31 @@ export default function VoiceAssistant() {
         window.speechSynthesis.cancel();
       }
 
+      let audio = new Audio('/');
+      let extraMessage = ""
+
+      switch (true) {
+        case response.includes("cormorán") || response.includes("cormoranes"):
+          extraMessage = " A continuación podrás escuchar al cormorán no volador, en su hábitat natural."
+          audio = new Audio("/audios/cormorant.mp3")
+          break;
+        case response.includes("pinzón") || response.includes("pinzones"):
+          extraMessage = " A continuación podrás escuchar al pinzón de Darwin, una especie emblemática de las Islas Galápagos."
+          audio = new Audio("/audios/pinzon.mp3")
+          break;
+        case response.includes("flamenco") || response.includes("flamencos"):
+          extraMessage = " A continuación podrás escuchar al flamenco, una especie única de Galápagos."
+          audio = new Audio("/audios/flamingos.mp3")
+          break;
+      }
+      const fullResponse = response + extraMessage
+      console.log("Respuesta:", fullResponse)
+
+
       // Usar Text-to-Speech del navegador para generar audio de respuesta
-      const utterance = new window.SpeechSynthesisUtterance(response)
+      const utterance = new window.SpeechSynthesisUtterance(fullResponse)
       utterance.lang = "es-ES"
-      utterance.rate = 1.1
+      utterance.rate = 1.2
       utterance.pitch = 1
 
       utterance.onstart = () => setState("playing")
@@ -222,6 +242,7 @@ export default function VoiceAssistant() {
         setTranscribedText("")
         setIsEditing(false)
         setConfidence(0)
+        audio.play()
       }
 
       utterance.onerror = (error) => {
